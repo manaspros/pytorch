@@ -946,6 +946,20 @@ class TestNN(NNTestCase):
         n3.extend(n2)
         self.assertEqual(n3, n1)
 
+    def test_ModuleList_insert_index(self):
+        mods = [nn.ReLU(), nn.Sigmoid(), nn.Tanh()]
+        ml = nn.ModuleList(mods)
+        elu = nn.ELU()
+        ml.insert(-1, elu)
+        self.assertEqual(list(ml), [mods[0], mods[1], elu, mods[2]])
+        self.assertEqual(list(ml._modules), ["0", "1", "2", "3"])
+
+        for bad in (5, -5):
+            with self.assertRaisesRegex(IndexError, "Index out of range"):
+                ml.insert(bad, nn.GELU())
+            self.assertEqual(list(ml), [mods[0], mods[1], elu, mods[2]])
+            self.assertEqual(list(ml._modules), ["0", "1", "2", "3"])
+
     def test_ModuleList(self):
         modules = [nn.ReLU(), nn.Linear(5, 5)]
         module_list = nn.ModuleList(modules)
