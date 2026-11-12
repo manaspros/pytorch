@@ -1749,6 +1749,13 @@ tensor(..., device='meta', size=(1,), requires_grad=True)""")
         vec = parameters_to_vector(model.parameters())
         self.assertEqual(vec.size(0), 980)
 
+    def test_parameters_to_vector_channels_last(self):
+        conv = nn.Conv2d(3, 4, 3).to(memory_format=torch.channels_last)
+        vec = parameters_to_vector(conv.parameters())
+        expected = torch.cat([p.contiguous().view(-1) for p in conv.parameters()])
+        self.assertEqual(vec, expected)
+        self.assertEqual(vec.numel(), 4 * 3 * 3 * 3 + 4)
+
     def test_vector_to_parameters(self):
         conv1 = nn.Conv2d(3, 10, 5)
         fc1 = nn.Linear(10, 20)
